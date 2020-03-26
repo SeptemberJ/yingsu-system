@@ -49,10 +49,10 @@ export function getService(data) {
   })
 }
 
-export function getContract(data) {
+export function getContract(dataStr) {
   return request({
-    url: 'contactController/list1/' + data.currentPage + '/' + data.pageSize + '?id=' + data.userId + '&type=' + data.type,
-    method: 'get'
+    url: '/contactController/pcContactlist?' + dataStr,
+    method: 'post'
   })
 }
 

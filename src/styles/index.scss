@@ -203,6 +203,9 @@ aside {
 #app .sidebar-container{
   z-index: 2020;
 }
+.el-dialog__wrapper{
+  left: 180px;
+}
 .el-dialog__header{
   padding: 10px !important;
   border-bottom: 1px solid #D7D7D7;

@@ -469,7 +469,7 @@
       </span>
     </el-dialog>
     <!-- 选择发货人 -->
-    <el-dialog :title="saveType == 'zh' ? '选择发货人' : '选择收货人'" :visible.sync="dialogVisibleChooseFH" :close-on-click-modal="false" width="1010px">
+    <el-dialog :title="saveType == 'zh' ? '选择发货人' : '选择收货人'" :visible.sync="dialogVisibleChooseContract" :close-on-click-modal="false" width="1010px">
       <el-form :inline="true" :model="formChooseSearch" label-position="top" size="small" class="demo-form-inline">
         <el-form-item :label="saveType == 'zh' ? '发货人姓名：' : '收货人姓名：'">
           <el-input v-model="formChooseSearch.fpeople" style="width: 140px;" />
@@ -491,7 +491,7 @@
         </el-form-item>
         <div style="float: right;text-align: right;overflow: hidden;margin-top: 42px;">
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="small" style="width:100px;">查询{{ getIndex }}</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" style="width:100px;" @click="searchContact">查询</el-button>
           </el-form-item>
         </div>
       </el-form>
@@ -616,7 +616,7 @@
       />
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" class="dialogBt" @click="sureChoosePeople">确 定</el-button>
-        <el-button class="dialogBt" @click="dialogVisibleChooseFH = false">取 消</el-button>
+        <el-button class="dialogBt" @click="dialogVisibleChooseContract = false">取 消</el-button>
       </span>
     </el-dialog>
     <!-- 油卡规则 -->
@@ -631,6 +631,7 @@
   </div>
 </template>
 <script>
+import Qs from 'qs'
 import permission from '@/directive/permission/index.js'
 import { formatToString, toDecimal2 } from '@/utils'
 import { getUserBasicInfo } from '@/utils/auth'
@@ -654,7 +655,7 @@ export default {
       key: 1, // table key
       getIndex: null,
       dialogVisibleSavePeople: false,
-      dialogVisibleChooseFH: false,
+      dialogVisibleChooseContract: false,
       dialogVisibleOil: false,
       saveType: '',
       curInfoIdx: '', // 装卸信息索引
@@ -702,7 +703,6 @@ export default {
             fixedTel: '',
             alias: '',
             company: '',
-            // option_province: [{ label: '--省--', value: '--省--' }, { label: '上海', value: '上海' }],
             option_city: [],
             option_area: [],
             date: '',
@@ -734,7 +734,6 @@ export default {
             fixedTel: '',
             alias: '',
             company: '',
-            // option_province: [{ label: '--省--', value: '--省--' }, { label: '上海', value: '上海' }],
             option_city: [],
             option_area: [],
             date: '',
@@ -909,8 +908,16 @@ export default {
       this.formOrder.oilCardTxt = toDecimal2(newVal) || '0.00'
       this.formOrder.price = toDecimal2(this.formOrder.expectedPrice - newVal)
     },
-    dialogVisibleChooseFH: function(newVal) {
+    dialogVisibleChooseContract: function(newVal) {
       if (!newVal) {
+        this.formChooseSearch = {
+          fpeople: '',
+          fphone: '',
+          company: '',
+          alias: '',
+          tpeople: '',
+          tphone: ''
+        }
         this.$refs.chooseTable.setCurrentRow()
       }
     }
@@ -981,13 +988,15 @@ export default {
       this.choosedRow = row
     },
     sureChoosePeople() {
-      if (this.choosedRow === {}) {
-        this.dialogVisibleChooseFH = false
+      if (!this.choosedRow.province) {
+        this.$message({
+          message: this.saveType === 'zh' ? '请先选择发货人！' : '请先选择收货人',
+          type: 'warning'
+        })
       } else {
         const type = this.saveType
         const idx = this.curInfoIdx
         const choosedRow = this.choosedRow
-        // const regionArr = choosedRow.region.split('-')
         this.formOrder[type + 'Info'][idx].province = choosedRow.province
         this.formOrder[type + 'Info'][idx].provinceId = choosedRow.provinceId
         this.formOrder[type + 'Info'][idx].city = choosedRow.city
@@ -1003,7 +1012,7 @@ export default {
         this.formOrder[type + 'Info'][idx].fixedPre = choosedRow.fixedPre || ''
         this.formOrder[type + 'Info'][idx].alias = choosedRow.alias
         this.formOrder[type + 'Info'][idx].company = choosedRow.company
-        this.dialogVisibleChooseFH = false
+        this.dialogVisibleChooseContract = false
         getCity({ pid: choosedRow.provinceId, fname: choosedRow.province }).then(res => {
           this.formOrder[type + 'Info'][idx].option_city = res.data
         })
@@ -1239,8 +1248,7 @@ export default {
       this.formOrder.zhInfo[idx].tphone = this.formOrder.zhInfo[idx].fphone
     },
     copyInfo(idx, type) {
-      const tmp = { ...this.formOrder[type + 'Info'][idx] }
-      this.formOrder[type + 'Info'].push(tmp)
+      this.formOrder[type + 'Info'].push({ ...this.formOrder[type + 'Info'][idx] })
     },
     addZX(type) {
       this.formOrder[type + 'Info'].push({
@@ -1257,9 +1265,8 @@ export default {
         fixedTel: '',
         alias: '',
         company: '',
-        option_province: [{ label: '--省--', value: '--省--' }, { label: '上海', value: '上海' }],
-        option_city: [{ label: '--市--', value: '--市--' }, { label: '上海市', value: '上海市' }],
-        option_area: [{ label: '--区/县--', value: '--区/县--' }],
+        option_city: [],
+        option_area: [],
         date: '',
         stage: '',
         time: '',
@@ -1391,6 +1398,10 @@ export default {
         this.btLoading = false
       })
     },
+    searchContact() {
+      this.$refs.chooseTable.setCurrentRow()
+      this.choosePeople(this.curInfoIdx, this.saveType, true)
+    },
     choosePeople(idx, type, ifInit) {
       this.tableLoading = true
       if (ifInit) {
@@ -1399,7 +1410,28 @@ export default {
       this.choosedRow = {}
       this.saveType = type
       this.curInfoIdx = idx
-      getContract({ currentPage: this.currentPage, pageSize: this.pageSize, userId: getUserBasicInfo().userID, type: type === 'zh' ? 0 : 1 }).then((res) => {
+      const tmpData = {
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+        id: getUserBasicInfo().userID,
+        type: type === 'zh' ? 0 : 1
+      }
+      if (this.formChooseSearch.fpeople) {
+        tmpData.fname = this.formChooseSearch.fpeople
+      }
+      if (this.formChooseSearch.fphone) {
+        tmpData.fmobile = this.formChooseSearch.fphone
+      }
+      if (this.formChooseSearch.tpeople) {
+        tmpData.fname1 = this.formChooseSearch.tpeople
+      }
+      if (this.formChooseSearch.tphone) {
+        tmpData.fmobile1 = this.formChooseSearch.tphone
+      }
+      if (this.formChooseSearch.alias) {
+        tmpData.fpoint = this.formChooseSearch.alias
+      }
+      getContract(Qs.stringify(tmpData)).then((res) => {
         this.contractList = res.data.map(item => {
           const tmp = {
             province: item.pareaname,
@@ -1424,7 +1456,7 @@ export default {
         this.sum = res.size
         this.tableLoading = false
       })
-      this.dialogVisibleChooseFH = true
+      this.dialogVisibleChooseContract = true
     },
     addGoods() {
       this.formOrder.goods.push({
