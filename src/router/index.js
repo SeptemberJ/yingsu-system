@@ -3,14 +3,7 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-/* Layout */
 import Layout from '@/layout'
-
-/* Router Modules */
-// import componentsRouter from './modules/components'
-// import chartsRouter from './modules/charts'
-// import tableRouter from './modules/table'
-// import nestedRouter from './modules/nested'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -33,11 +26,6 @@ import Layout from '@/layout'
   }
  */
 
-/**
- * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
- */
 export const constantRoutes = [
   {
     path: '/redirect',
@@ -119,6 +107,7 @@ export const asyncRoutes = [
       }
     ]
   },
+
   {
     path: '/order',
     component: Layout,
@@ -301,6 +290,7 @@ export const asyncRoutes = [
       }
     ]
   },
+
   {
     path: '/example',
     component: Layout,
@@ -332,8 +322,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
-  // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
 
@@ -355,7 +343,6 @@ const createRouter = () => new Router({
 
 const router = createRouter()
 
-// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router

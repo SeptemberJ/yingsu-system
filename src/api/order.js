@@ -1,20 +1,20 @@
 import request from '@/utils/request'
 
-export function getCarType(data) {
+export function getCarType() {
   return request({
     url: '/typeController/tstype/2c90b4bf6c1ccde9016c1cdb2c4f000a',
     method: 'get'
   })
 }
 
-export function getCarLong(data) {
+export function getCarLong() {
   return request({
     url: '/zCarLengthController/list',
     method: 'get'
   })
 }
 
-export function getProvince(data) {
+export function getProvince() {
   return request({
     url: '/tokens/regionSelect?pid=100000',
     method: 'get'
@@ -35,14 +35,14 @@ export function getArea(data) {
   })
 }
 
-export function getGoodsKind(data) {
+export function getGoodsKind() {
   return request({
     url: '/typeController/list/1/200',
     method: 'get'
   })
 }
 
-export function getService(data) {
+export function getService() {
   return request({
     url: '/typeController/tstype/2c90b4576e634e80016e637fb54a0003',
     method: 'get'

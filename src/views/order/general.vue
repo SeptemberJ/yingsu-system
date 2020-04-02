@@ -102,7 +102,6 @@
 </template>
 <script>
 
-// import { getUserBasicInfo } from '@/utils/auth'
 import { getProvince, getCity, getArea } from '@/api/order'
 export default {
   name: 'General',

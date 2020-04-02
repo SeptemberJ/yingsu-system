@@ -30,7 +30,6 @@ router.beforeEach(async(to, from, next) => {
       // else if (to.path === '/header' || to.path === '/Carousel' || to.path === '/production' || to.path === '/strength' || to.path === '/partner' || to.path === '/download' || to.path === '/aboutUs') {
       //   next({ path: '/website' })
       // }
-      // determine whether the user has obtained his permission roles through getInfo
       // const hasRoles = store.getters.roles && store.getters.roles.length > 0
       const hasRegistered = store.getters.name && store.getters.name !== ''
       if (hasRegistered) {
@@ -39,7 +38,7 @@ router.beforeEach(async(to, from, next) => {
         try {
           // 获取用户菜单信息
           const userMenu = await store.dispatch('user/getInfo')
-          // 基于用户权限生成可访问路由表
+          // 基于用户菜单生成可访问路由表
           const accessRoutes = await store.dispatch('permission/generateRoutes', userMenu)
           console.log('accessRoutes', accessRoutes)
           // 动态添加可访问路由
@@ -67,6 +66,5 @@ router.beforeEach(async(to, from, next) => {
 })
 
 router.afterEach(() => {
-  // finish progress bar
   NProgress.done()
 })

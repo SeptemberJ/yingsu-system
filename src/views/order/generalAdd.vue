@@ -18,14 +18,14 @@
               <el-input v-model="formOrder.cusOrderNo" placeholder="请填写您自己系统的相关单号" style="width: 250px;" />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
+          <el-col :span="24" style="margin-top:10px;">
             <el-form-item label="用车车型：(最多选3项)" class="RequireLabel" prop="vehicleType">
               <el-checkbox-group v-model="formOrder.vehicleType" :max="3" size="small">
                 <el-checkbox-button v-for="type in option_vehicleType" :key="type.typename" :label="type.typename" @change="((value) => {changeCarType(value, type)})" />
               </el-checkbox-group>
             </el-form-item>
           </el-col>
-          <el-col :span="24">
+          <el-col :span="24" style="margin-top:10px;">
             <el-form-item label="用车车长：(最多选3项)" class="RequireLabel" prop="vehicleLength">
               <el-checkbox-group v-model="formOrder.vehicleLength" :max="3" size="small" style="display:inline-block;">
                 <el-checkbox-button v-for="length in option_vehicleLength" :key="length.carLength" :label="length.carLength" @change="((value) => {showTips(value, length)})" />
@@ -56,8 +56,8 @@
             <div v-show="formOrder.zhInfo.length > 1" class="IndexBlock">{{ zhIdx + 1 }}</div>
             <div class="AddrMian">
               <div class="leftInfoBlock">
-                <el-form-item label="装货地址：" class="RequireLabel" style="width:30%;" :prop="'zhInfo.' + zhIdx + '.area'" :rules="rulesOrder.area">
-                  <el-select v-model="zhItem.provinceId" placeholder="请选择" @change="((value) => { changeProvince(value, zhIdx, 'zh', 0) })">
+                <el-form-item label="装货地址：" class="RequireLabel" style="width:30%;" :prop="'zhInfo.' + zhIdx + '.areaId'" :rules="rulesOrder.areaId">
+                  <el-select v-model="zhItem.provinceId" placeholder="请选择" @change="((value) => { changeProvince(value, zhIdx, 'zh', true) })">
                     <el-option
                       v-for="item in option_province"
                       :key="item.id"
@@ -153,8 +153,8 @@
             <div v-show="formOrder.xhInfo.length > 1" class="IndexBlock">{{ xhIdx + 1 }}</div>
             <div class="AddrMian">
               <div class="leftInfoBlock">
-                <el-form-item label="卸货地址：" class="RequireLabel" style="width:30%;" :prop="'xhInfo.' + xhIdx + '.area'" :rules="rulesOrder.area">
-                  <el-select v-model="xhItem.provinceId" placeholder="请选择" @change="((value) => { changeProvince(value, xhIdx, 'xh', 0) })">
+                <el-form-item label="卸货地址：" class="RequireLabel" style="width:30%;" :prop="'xhInfo.' + xhIdx + '.areaId'" :rules="rulesOrder.areaId">
+                  <el-select v-model="xhItem.provinceId" placeholder="请选择" @change="((value) => { changeProvince(value, xhIdx, 'xh', true) })">
                     <el-option
                       v-for="item in option_province"
                       :key="item.id"
@@ -202,7 +202,7 @@
                 </el-form-item>
               </div>
               <div class="dateBlock">
-                <el-form-item label="卸货日期：" class="RequireLabel">
+                <el-form-item label="卸货日期：" class="RequireLabel" :prop="'xhInfo.' + xhIdx + '.date'" :rules="rulesOrder.date">
                   <el-date-picker
                     v-model="xhItem.date"
                     :picker-options="startDateDisabled"
@@ -213,7 +213,7 @@
                     @change="((value) => {changeDate(value, xhIdx, 'xh')})"
                   />
                 </el-form-item>
-                <el-form-item label="卸货时段：" class="RequireLabel">
+                <el-form-item label="卸货时段：" class="RequireLabel" :prop="'xhInfo.' + xhIdx + '.stage'" :rules="rulesOrder.stage">
                   <el-select v-model="xhItem.stage" placeholder="请选择" style="width: 118px;" @change="((value) => {changeStage(value, xhIdx, 'xh')})">
                     <el-option
                       v-for="item in xhItem.stageOptions"
@@ -223,7 +223,7 @@
                     />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="卸货时间：" class="RequireLabel">
+                <el-form-item label="卸货时间：" class="RequireLabel" :prop="'xhInfo.' + xhIdx + '.time'" :rules="rulesOrder.time">
                   <el-select v-model="xhItem.time" placeholder="请选择" style="width: 118px;">
                     <el-option
                       v-for="item in xhItem.timeOptions"
@@ -396,7 +396,7 @@
       </div>
       <div class="ContentCard">
         <div class="totalInfo">
-          合计运费：￥{{ formOrder.expectedPriceTxt }} <span class="symbol">-</span> 使用油卡：<span style="color: #D9001B;">￥{{ formOrder.oilCardTxt }}</span> <span class="symbol">=</span> 平台运费：<span style="color: #1890FF;">￥{{ formOrder.price }}</span>
+          {{ sumAmount }}合计运费：￥{{ formOrder.expectedPriceTxt }} <span class="symbol">-</span> 使用油卡：<span style="color: #D9001B;">￥{{ formOrder.oilCardTxt }}</span> <span class="symbol">=</span> 平台运费：<span style="color: #1890FF;">￥{{ formOrder.price }}</span>
           <span class="btBlock">
             <div class="Bt hoverBtBlue" style="width: 100px;">取消</div>
             <el-button type="primary" size="small" style="width:100px;height:30px;color: #FFFFFF;float: right;margin-top:7px;margin-left: 10px;" @click="submitForm('formOrder')">确认发货</el-button>
@@ -657,7 +657,7 @@ export default {
       dialogVisibleSavePeople: false,
       dialogVisibleChooseContract: false,
       dialogVisibleOil: false,
-      saveType: '',
+      saveType: '', // 当前装卸类型
       curInfoIdx: '', // 装卸信息索引
       startDateDisabled: {
         disabledDate(time) {
@@ -679,6 +679,7 @@ export default {
       ],
       totalWeight: 0,
       totalVolume: 0,
+      sumAmount: 0,
       formOrder: {
         carType: '',
         cusOrderNo: '',
@@ -770,52 +771,52 @@ export default {
       },
       rulesOrder: {
         carType: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择用车类型', trigger: 'change' }
         ],
         vehicleType: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择用车车型', trigger: 'change' }
         ],
         vehicleLength: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择用车车长', trigger: 'change' }
         ],
         areaId: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请将地址选择完整', trigger: 'change' }
         ],
         addr: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请输入详细地址', trigger: 'change' }
         ],
         fpeople: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请输入姓名', trigger: 'change' }
         ],
         fphone: [
-          { required: true, message: ' ', trigger: 'blur', validator: validatePhone }
+          { required: true, message: '手机号格式不正确', trigger: 'blur', validator: validatePhone }
         ],
         tpeople: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请输入姓名', trigger: 'change' }
         ],
         tphone: [
-          { required: true, message: ' ', trigger: 'blur', validator: validatePhone }
+          { required: true, message: '手机号格式不正确', trigger: 'blur', validator: validatePhone }
         ],
         fixedTel: [
           { required: true, message: ' ', trigger: 'change' }
         ],
         date: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择日期', trigger: 'change' }
         ],
         stage: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择时段', trigger: 'change' }
         ],
         time: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择时间', trigger: 'change' }
         ],
         code: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请选择货物类型', trigger: 'change' }
         ],
         kind: [
           { required: true, message: ' ', trigger: 'change' }
         ],
         name: [
-          { required: true, message: ' ', trigger: 'change' }
+          { required: true, message: '请输入货物名称', trigger: 'change' }
         ],
         weight: [
           { required: true, message: ' ', trigger: 'change' }
@@ -897,16 +898,22 @@ export default {
         })
         this.totalWeight = totalWeight
         this.totalVolume = totalVolume
+        this.updatePrice(this.formOrder.suffix)
       },
       deep: true
     },
     'formOrder.expectedPrice': function(newVal) {
-      this.formOrder.expectedPriceTxt = toDecimal2(newVal) || '0.00'
-      this.formOrder.price = toDecimal2(newVal - this.formOrder.oilCard)
+      this.updatePrice(this.formOrder.suffix)
+      // this.formOrder.expectedPriceTxt = toDecimal2(newVal) || '0.00'
+      // this.formOrder.price = toDecimal2(newVal - this.formOrder.oilCard)
     },
     'formOrder.oilCard': function(newVal) {
       this.formOrder.oilCardTxt = toDecimal2(newVal) || '0.00'
-      this.formOrder.price = toDecimal2(this.formOrder.expectedPrice - newVal)
+      this.updatePrice(this.formOrder.suffix)
+      // this.formOrder.price = toDecimal2(this.formOrder.expectedPrice - newVal)
+    },
+    'formOrder.suffix': function(newVal) {
+      this.updatePrice(newVal)
     },
     dialogVisibleChooseContract: function(newVal) {
       if (!newVal) {
@@ -943,8 +950,61 @@ export default {
     provingWV(idx, type) {
       this.formOrder.goods[idx][type] = Number(this.formOrder.goods[idx][type])
     },
+    updatePrice(perUnit) {
+      let checkNumber = {}
+      switch (perUnit) {
+        case '元/吨':
+          if (this.totalWeight === 0) {
+            this.$message({
+              message: '元/吨 要求货物总重量大于0，请输入货物重量！',
+              type: 'warning'
+            })
+          } else {
+            this.formOrder.expectedPriceTxt = toDecimal2(this.formOrder.expectedPrice * this.totalWeight)
+            this.formOrder.price = toDecimal2(this.formOrder.expectedPrice * this.totalWeight - this.formOrder.oilCard)
+          }
+          break
+        case '元/方':
+          if (this.totalVolume === 0) {
+            this.$message({
+              message: '元/吨 要求货物总体积大于0，请输入货物体积！',
+              type: 'warning'
+            })
+          } else {
+            this.formOrder.expectedPriceTxt = toDecimal2(this.formOrder.expectedPrice * this.totalVolume)
+            this.formOrder.price = toDecimal2(this.formOrder.expectedPrice * this.totalVolume - this.formOrder.oilCard)
+          }
+          break
+        case '元/件':
+          checkNumber = this.totalAmount()
+          this.sumAmount = checkNumber.totalAmount
+          if (checkNumber.totalAmount === 0 || checkNumber.hasEmpty) {
+            this.$message({
+              message: '元/件 要求填写货物数量，请填写货物数量或补充完整！',
+              type: 'warning'
+            })
+          } else {
+            this.formOrder.expectedPriceTxt = toDecimal2(this.formOrder.expectedPrice * checkNumber.totalAmount)
+            this.formOrder.price = toDecimal2(this.formOrder.expectedPrice * checkNumber.totalAmount - this.formOrder.oilCard)
+          }
+          break
+        default:
+          this.formOrder.expectedPriceTxt = toDecimal2(this.formOrder.expectedPrice) || '0.00'
+          this.formOrder.price = toDecimal2(this.formOrder.expectedPrice - this.formOrder.oilCard)
+      }
+    },
+    totalAmount() {
+      let hasEmpty = false
+      let totalAmount = 0
+      this.formOrder.goods.map(goods => {
+        totalAmount += Number(goods.number)
+        if (!goods.number) {
+          hasEmpty = true
+        }
+      })
+      return ({ hasEmpty: hasEmpty, totalAmount: totalAmount })
+    },
     tableRowClassName({ row, rowIndex }) {
-      // row.index = rowIndex
       if (rowIndex % 2 === 0) {
         return ''
       } else {
@@ -958,12 +1018,26 @@ export default {
         return ''
       }
     },
+    // 用户自定义车长
     customerCarLength(event) {
-      if (event.target.value.trim()) {
+      const cusCarLen = Number(event.target.value)
+      if (cusCarLen === 0) {
+        this.formOrder.cusCarLength = ''
+        return false
+      }
+      if (cusCarLen > 0) {
         // 车长查重
-        const ifHasDuplicate = this.ifHasDuplicate(event.target.value.trim() + '米')
+        const ifHasDuplicate = this.ifHasDuplicate(cusCarLen + '米')
         if (ifHasDuplicate === undefined) {
-          this.option_vehicleLength.push({ carLength: event.target.value + '米' })
+          if (this.formOrder.vehicleLength.length === 3) {
+            this.$message({
+              message: '用车车长最多选3项！',
+              type: 'warning'
+            })
+          } else {
+            this.option_vehicleLength.push({ carLength: cusCarLen + '米' })
+            this.formOrder.vehicleLength.push(cusCarLen + '米')
+          }
         } else {
           this.$message({
             message: '该车长已存在，可以直接选择！',
@@ -971,8 +1045,15 @@ export default {
           })
         }
         this.formOrder.cusCarLength = ''
+      } else {
+        this.$message({
+          message: '请输入有效车长！',
+          type: 'warning'
+        })
+        this.formOrder.cusCarLength = ''
       }
     },
+    // 车长是否已存在
     ifHasDuplicate(len) {
       const dp = this.option_vehicleLength.find((carLen) => {
         if (carLen.carLength === len) {
@@ -1254,8 +1335,11 @@ export default {
       this.formOrder[type + 'Info'].push({
         ftype: type === 'zh' ? 0 : 1, // 0-发货 1-卸货
         province: '',
+        provinceId: '',
         city: '',
+        cityId: '',
         area: '',
+        areaId: '',
         addr: '',
         fpeople: '',
         fphone: '',
@@ -1482,9 +1566,17 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (this.compareDateTime()) {
+          const compareInfo = this.compareDateTime()
+          if (compareInfo[0]) {
             this.$message({
-              message: '卸货时间不能早于装货时间！',
+              message: '最早卸货时间不能早于最早装货时间！',
+              type: 'warning'
+            })
+            return false
+          }
+          if (compareInfo[1]) {
+            this.$message({
+              message: '最晚卸货时间不能早于最晚装货时间！',
               type: 'warning'
             })
             return false
@@ -1554,7 +1646,7 @@ export default {
             goodscode: this.splicing(this.formOrder.goods, 'code', ','),
             fvolume: this.totalVolume,
             fweight: this.totalWeight,
-            ffee: this.formOrder.expectedPriceTxt,
+            ffee: this.formOrder.price, // this.formOrder.expectedPriceTxt
             foilcard: this.formOrder.oilCard,
             require_fnote: this.splicing(this.formOrder.service, null, '|'),
             fnote: this.formOrder.fnote,
@@ -1576,7 +1668,6 @@ export default {
             orderContact: zhInfoTmp.concat(xhInfoTmp)
           }
           this.btLoading = true
-          // console.log(Qs.stringify(DATA))
           submitOrder(DATA).then(res => {
             if (res.respCode === '0') {
               this.$message({
@@ -1592,6 +1683,7 @@ export default {
             this.btLoading = false
           })
         } else {
+          console.log(this.formOrder)
           this.$message({
             message: '请将信息填写完整！',
             type: 'warning'
@@ -1600,7 +1692,7 @@ export default {
         }
       })
     },
-    // 拼接
+    // 下单前拼接成字符串
     splicing(arr, pro, symbolStr) {
       let SplicdString = ''
       arr.map(item => {
@@ -1641,6 +1733,7 @@ export default {
           return ''
       }
     },
+    // 装卸时间比较
     compareDateTime() {
       const dateTimeZ = this.formOrder.zhInfo.map(item => {
         if (item.time === '都可以') {
@@ -1678,7 +1771,7 @@ export default {
           return (new Date(item.date + ' ' + item.time)).getTime()
         }
       })
-      return Math.min(...dateTimeX) <= Math.min(...dateTimeZ)
+      return [Math.min(...dateTimeX) <= Math.min(...dateTimeZ), Math.max(...dateTimeX) <= Math.max(...dateTimeZ)]
     },
     changeProvince(val, idx, type, ifclear) {
       let fname = ''
@@ -1689,7 +1782,7 @@ export default {
           getCity({ pid: val, fname: fname }).then(res => {
             this.formOrder[type + 'Info'][idx].option_city = res.data
           })
-          if (ifclear === 0) {
+          if (ifclear) {
             this.formOrder[type + 'Info'][idx].city = ''
             this.formOrder[type + 'Info'][idx].cityId = ''
             this.formOrder[type + 'Info'][idx].area = ''
@@ -1698,7 +1791,6 @@ export default {
           }
         }
       })
-      // console.log(val, this.formOrder[type + 'Info'][idx].province, this.formOrder[type + 'Info'][idx].provinceId)
     },
     changeCity(val, idx, type, ifclear) {
       let fname = ''
@@ -1713,6 +1805,7 @@ export default {
             this.formOrder[type + 'Info'][idx].area = ''
             this.formOrder[type + 'Info'][idx].areaId = ''
             this.formOrder[type + 'Info'][idx].option_area = []
+            this.formOrder[type + 'Info'][idx].fixedPre = ''
           }
         }
       })
@@ -1803,7 +1896,6 @@ $primaryBlue: #1890FF;
   .ContentCard{
     width: 100%;
     float: left;
-    /*background: #FFFFFF;*/
     margin-bottom: 10px;
     .ColumTitBar{
       padding: 0 20px;
@@ -1910,12 +2002,12 @@ $primaryBlue: #1890FF;
             float: right;
             text-align: right;
             overflow: hidden;
-            /*margin-top: 30px;*/
           }
           .dateBlock{
             width: 100%;
             display: block;
             float: left;
+            margin-top: 8px;
           }
         }
       }
